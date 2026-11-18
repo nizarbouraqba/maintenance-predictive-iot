@@ -1,0 +1,51 @@
+[
+  {
+    "id": "pdm-subflow",
+    "type": "subflow",
+    "name": "Valider une mesure AI4I",
+    "info": "Sous-flux réutilisable. API_URL paramétrable. Le schéma Python reste autoritaire.",
+    "in": [
+      {
+        "x": 40,
+        "y": 80,
+        "wires": [
+          {
+            "id": "pdm-validate"
+          }
+        ]
+      }
+    ],
+    "out": [
+      {
+        "x": 440,
+        "y": 80,
+        "wires": [
+          {
+            "id": "pdm-validate",
+            "port": 0
+          }
+        ]
+      }
+    ],
+    "env": [
+      {
+        "name": "API_URL",
+        "type": "str",
+        "value": "http://api:8000"
+      }
+    ]
+  },
+  {
+    "id": "pdm-validate",
+    "type": "function",
+    "z": "pdm-subflow",
+    "name": "Valider le contrat",
+    "func": "const p = msg.payload;\nif (!p || typeof p !== 'object') { node.error('Objet JSON requis', msg); return null; }\nconst names = ['air_temperature_k','process_temperature_k','rotational_speed_rpm','torque_nm','tool_wear_min'];\nif (!['L','M','H'].includes(p.type) || !p.message_id || !p.machine_id || !p.sent_at) { node.error('Champs obligatoires invalides',msg); return null; }\nfor (const key of names) { if (typeof p[key] !== 'number' || !Number.isFinite(p[key]) || p[key] < 0) { node.error('Mesure invalide: '+key,msg); return null; } }\nmsg.url = env.get('API_URL') + '/api/telemetry';\nmsg.headers = {'Content-Type':'application/json'};\nreturn msg;",
+    "outputs": 1,
+    "x": 240,
+    "y": 80,
+    "wires": [
+      []
+    ]
+  }
+]

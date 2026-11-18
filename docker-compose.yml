@@ -1,0 +1,122 @@
+name: maintenance-predictive-iot
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0.21
+    ports: ["127.0.0.1:1883:1883"]
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mqtt-data:/mosquitto/data
+    restart: unless-stopped
+  influxdb:
+    image: influxdb:2.7.11
+    ports: ["127.0.0.1:8086:8086"]
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_PASSWORD:-pdm-local-password}
+      DOCKER_INFLUXDB_INIT_ORG: industrie
+      DOCKER_INFLUXDB_INIT_BUCKET: maintenance
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN:-pdm-local-demo-token-change-before-deployment}
+    volumes: ["influx-data:/var/lib/influxdb2"]
+    healthcheck:
+      test: ["CMD", "influx", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+  api:
+    build: .
+    image: pdm-project:local
+    ports: ["127.0.0.1:8000:8000"]
+    environment:
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_ORG: industrie
+      INFLUX_BUCKET: maintenance
+      INFLUX_TOKEN: ${INFLUX_TOKEN:-pdm-local-demo-token-change-before-deployment}
+      TB_ENABLED: ${TB_ENABLED:-0}
+      TB_URL: http://thingsboard:8080
+    volumes: ["./runtime:/app/runtime"]
+    depends_on:
+      influxdb: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+  consumer:
+    image: pdm-project:local
+    command: ["python", "-m", "pdm.consumer"]
+    environment: {MQTT_HOST: mosquitto, API_URL: "http://api:8000"}
+    volumes: ["./runtime:/app/runtime"]
+    depends_on:
+      api: {condition: service_healthy}
+      mosquitto: {condition: service_started}
+    restart: unless-stopped
+  simulator:
+    image: pdm-project:local
+    profiles: [demo]
+    command: ["python", "-m", "pdm.simulator", "--count", "2000", "--interval", "1"]
+    environment: {MQTT_HOST: mosquitto}
+    depends_on:
+      api: {condition: service_healthy}
+      consumer: {condition: service_started}
+  grafana:
+    image: grafana/grafana:11.6.1
+    ports: ["127.0.0.1:3000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-pdm-local-password}
+      INFLUX_TOKEN: ${INFLUX_TOKEN:-pdm-local-demo-token-change-before-deployment}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on: [influxdb]
+    restart: unless-stopped
+  node-red-init:
+    image: nodered/node-red:4.0.9
+    entrypoint: ["node", "/seed/init.js"]
+    command: []
+    volumes:
+      - node-red-data:/data
+      - ./node_red:/seed:ro
+    restart: "no"
+  node-red:
+    image: nodered/node-red:4.0.9
+    ports: ["127.0.0.1:1880:1880"]
+    volumes:
+      - node-red-data:/data
+    depends_on:
+      node-red-init: {condition: service_completed_successfully}
+      api: {condition: service_started}
+      mosquitto: {condition: service_started}
+    restart: unless-stopped
+  postgres:
+    image: postgres:18
+    profiles: [full]
+    environment: {POSTGRES_DB: thingsboard, POSTGRES_PASSWORD: postgres}
+    volumes: ["tb-postgres:/var/lib/postgresql"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d thingsboard"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+  thingsboard:
+    image: thingsboard/tb-node:4.3.1.8
+    profiles: [full]
+    ports: ["127.0.0.1:8080:8080", "127.0.0.1:1884:1883"]
+    environment:
+      TB_SERVICE_ID: pdm-thingsboard
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/thingsboard
+      SPRING_DATASOURCE_PASSWORD: postgres
+      TB_QUEUE_TYPE: in-memory
+    depends_on:
+      postgres: {condition: service_healthy}
+    restart: unless-stopped
+volumes:
+  mqtt-data:
+  influx-data:
+  grafana-data:
+  node-red-data:
+  tb-postgres:

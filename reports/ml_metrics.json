@@ -1,0 +1,75 @@
+{
+  "model_version": "rf-ai4i-dc6630cd9b",
+  "sklearn_version": "1.6.1",
+  "seed": 42,
+  "dataset_rows": 10000,
+  "failures": 339,
+  "split_sizes": {
+    "train": 6000,
+    "validation": 2000,
+    "test": 2000
+  },
+  "test_failure_count": 68,
+  "average_precision": 0.8497367046228836,
+  "roc_auc": 0.959562629399586,
+  "brier_score": 0.011618027665680543,
+  "baseline_all_healthy": {
+    "threshold_strict_gt": 0.5,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "accuracy": 0.966,
+    "confusion_matrix_tn_fp_fn_tp": [
+      1932,
+      0,
+      68,
+      0
+    ]
+  },
+  "at_0_5": {
+    "threshold_strict_gt": 0.5,
+    "precision": 0.9038461538461539,
+    "recall": 0.6911764705882353,
+    "f1": 0.7833333333333333,
+    "accuracy": 0.987,
+    "confusion_matrix_tn_fp_fn_tp": [
+      1927,
+      5,
+      21,
+      47
+    ]
+  },
+  "at_0_7": {
+    "threshold_strict_gt": 0.7,
+    "precision": 0.9714285714285714,
+    "recall": 0.5,
+    "f1": 0.6601941747572816,
+    "accuracy": 0.9825,
+    "confusion_matrix_tn_fp_fn_tp": [
+      1931,
+      1,
+      34,
+      34
+    ]
+  },
+  "validation_selected_threshold": 0.38999999999999996,
+  "at_validation_threshold": {
+    "threshold_strict_gt": 0.38999999999999996,
+    "precision": 0.8548387096774194,
+    "recall": 0.7794117647058824,
+    "f1": 0.8153846153846154,
+    "accuracy": 0.988,
+    "confusion_matrix_tn_fp_fn_tp": [
+      1923,
+      9,
+      15,
+      53
+    ]
+  },
+  "limitations": [
+    "Données synthétiques.",
+    "Classification de la panne courante, aucun horizon futur.",
+    "Split stratifié aléatoire : pas de preuve de généralisation temporelle ou à une autre usine.",
+    "Score non calibré ; courbe de calibration fournie."
+  ]
+}

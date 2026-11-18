@@ -1,0 +1,130 @@
+{
+  "ruleChain": {
+    "name": "Projet 11 - Maintenance AI4I",
+    "type": "CORE",
+    "root": false,
+    "debugMode": false,
+    "configuration": null,
+    "additionalInfo": {
+      "description": "Seuil synchronisé depuis les attributs partagés. Hystérésis calculée par le service."
+    }
+  },
+  "metadata": {
+    "firstNodeIndex": 0,
+    "nodes": [
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "Télémétrie seulement",
+        "debugMode": false,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "return msgType === 'POST_TELEMETRY_REQUEST';"
+        },
+        "additionalInfo": {
+          "layoutX": 100,
+          "layoutY": 100
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode",
+        "name": "Sauver télémétrie",
+        "debugMode": false,
+        "configuration": {
+          "defaultTTL": 0,
+          "useServerTs": false
+        },
+        "additionalInfo": {
+          "layoutX": 300,
+          "layoutY": 100
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "Score strictement supérieur au seuil",
+        "debugMode": false,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "return typeof msg.panne_probable === 'number' && msg.panne_probable > (typeof msg.seuil_critique === 'number' ? msg.seuil_critique : 0.7);"
+        },
+        "additionalInfo": {
+          "layoutX": 550,
+          "layoutY": 100
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.action.TbCreateAlarmNode",
+        "name": "Créer CRITICAL",
+        "debugMode": false,
+        "configuration": {
+          "alarmType": "Risque de défaillance",
+          "severity": "CRITICAL",
+          "scriptLang": "JS",
+          "alarmDetailsBuildJs": "return {score:msg.panne_probable, seuil:msg.seuil_critique, model:msg.model_version};",
+          "propagate": false,
+          "propagateToOwner": false,
+          "propagateToTenant": false,
+          "relationTypes": []
+        },
+        "additionalInfo": {
+          "layoutX": 800,
+          "layoutY": 70
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "Retour stabilisé",
+        "debugMode": false,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "return msg.status === 'NORMAL' && typeof msg.panne_probable === 'number';"
+        },
+        "additionalInfo": {
+          "layoutX": 800,
+          "layoutY": 220
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.action.TbClearAlarmNode",
+        "name": "Effacer alarme",
+        "debugMode": false,
+        "configuration": {
+          "alarmType": "Risque de défaillance",
+          "scriptLang": "JS",
+          "alarmDetailsBuildJs": "return {score:msg.panne_probable, retour:msg.seuil_retour};"
+        },
+        "additionalInfo": {
+          "layoutX": 1030,
+          "layoutY": 220
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 1,
+        "type": "True"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 2,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 3,
+        "type": "True"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 4,
+        "type": "False"
+      },
+      {
+        "fromIndex": 4,
+        "toIndex": 5,
+        "type": "True"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}

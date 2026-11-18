@@ -1,0 +1,13 @@
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+pydantic==2.11.4
+pandas==2.2.3
+numpy==2.2.5
+scikit-learn==1.6.1
+scipy==1.15.2
+joblib==1.4.2
+paho-mqtt==2.1.0
+influxdb-client==1.48.0
+httpx==0.28.1
+matplotlib==3.10.3
+websockets==15.0.1

@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+
+runtime/
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
+*.tar
+*.tar.gz
+*.zip
+docker-export/
+export-docker-*/

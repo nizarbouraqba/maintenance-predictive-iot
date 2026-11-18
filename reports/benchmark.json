@@ -1,0 +1,52 @@
+{
+  "broker": "Mosquitto Docker",
+  "order": [
+    "HTTP",
+    "MQTT",
+    "WebSocket"
+  ],
+  "count_per_protocol": 100,
+  "method": "RTT applicatif validation/\u00e9cho, connexions r\u00e9utilis\u00e9es, localhost, s\u00e9quentiel, sans ML ni stockage.",
+  "volume_scope": "Octets JSON applicatifs uniquement, hors en-t\u00eates, handshakes, ACK, retransmissions et TCP/IP.",
+  "results": [
+    {
+      "protocol": "HTTP",
+      "sent": 100,
+      "unique_received": 100,
+      "delivery_pct": 100.0,
+      "duplicates_observed": 0,
+      "mean_rtt_ms": 2.29869585,
+      "median_rtt_ms": 1.8443205,
+      "p95_rtt_ms": 4.848056,
+      "max_rtt_ms": 13.650538,
+      "application_request_bytes": 27140,
+      "application_echo_bytes": 27140
+    },
+    {
+      "protocol": "MQTT",
+      "sent": 100,
+      "unique_received": 100,
+      "delivery_pct": 100.0,
+      "duplicates_observed": 0,
+      "mean_rtt_ms": 90.63026966,
+      "median_rtt_ms": 91.533285,
+      "p95_rtt_ms": 95.32024,
+      "max_rtt_ms": 96.260092,
+      "application_request_bytes": 27140,
+      "application_echo_bytes": 27140
+    },
+    {
+      "protocol": "WebSocket",
+      "sent": 100,
+      "unique_received": 100,
+      "delivery_pct": 100.0,
+      "duplicates_observed": 0,
+      "mean_rtt_ms": 0.78009602,
+      "median_rtt_ms": 0.734288,
+      "p95_rtt_ms": 1.170443,
+      "max_rtt_ms": 3.141144,
+      "application_request_bytes": 27140,
+      "application_echo_bytes": 27140
+    }
+  ]
+}

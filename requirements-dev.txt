@@ -1,0 +1,8 @@
+-r requirements.txt
+pytest==8.3.5
+nbformat==5.10.4
+nbclient==0.10.2
+ipykernel==6.29.5
+PyYAML==6.0.2
+amqtt==0.11.3
+psutil==7.2.2

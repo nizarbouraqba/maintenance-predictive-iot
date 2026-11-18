@@ -1,0 +1,14 @@
+{
+  "result": "passed",
+  "flow": "MQTT QoS1 -> consumer -> HTTP -> vrai mod\u00e8le -> SQLite -> WebSocket",
+  "unique_messages": 5,
+  "deduplication_verified": true,
+  "broker": "aMQTT 0.11.3",
+  "not_executed": [
+    "Mosquitto Docker",
+    "InfluxDB",
+    "Grafana",
+    "Node-RED runtime",
+    "ThingsBoard runtime"
+  ]
+}
